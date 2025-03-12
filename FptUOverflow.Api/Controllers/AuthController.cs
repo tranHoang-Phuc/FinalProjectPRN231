@@ -38,5 +38,11 @@ namespace FptUOverflow.Api.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok("Hello");
+        }
     }
 }
