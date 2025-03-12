@@ -6,7 +6,7 @@ namespace FptUOverflow.Api.Services.IServices
 {
     public interface IQuestionService
     {
-        Task<QuestionResponse> CreateAnswerAsync(Guid id, CreationAnswer answer);
+        Task<AnswerResponse> CreateAnswerAsync(Guid id, CreationAnswer answer);
         Task<QuestionResponse> CreateQuestionAsync(CreateQuestionRequest request);
         Task DeleteAnswerAsync(Guid id, Guid answerId);
         Task DeleteImageAsync(string url);

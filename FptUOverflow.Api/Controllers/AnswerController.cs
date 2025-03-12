@@ -20,6 +20,7 @@ namespace FptUOverflow.Api.Controllers
         }
 
         [HttpPut("{id}/answers/{answerId}/{accept}")]
+        [Authorize]
         public async Task<IActionResult> ApproveAnswer([FromRoute] Guid id, [FromRoute] Guid answerId, [FromRoute] string accept)
         {
             var baseResponse = await _answerService.ApproveAnswerAsync(id, answerId, accept);
@@ -31,6 +32,7 @@ namespace FptUOverflow.Api.Controllers
         }
 
         [HttpPost("{id}/{mode}")]
+        [Authorize]
         public async Task<IActionResult> VoteAnswer([FromRoute] Guid id, [FromRoute] string mode)
         {
             var baseResponse = await _answerService.VoteAnswerAsync(id, mode);
