@@ -30,7 +30,7 @@ namespace FptUOverflow.Api.Services
 
         
 
-        public async Task<QuestionResponse> CreateAnswerAsync(Guid id, CreationAnswer answer)
+        public async Task<AnswerResponse> CreateAnswerAsync(Guid id, CreationAnswer answer)
         {
             var userId = GetUserId();
             var questions = await _unitOfWork.QuestionRepository.GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
@@ -55,7 +55,8 @@ namespace FptUOverflow.Api.Services
             var response = await _unitOfWork.QuestionRepository
                 .GetAllAsync(q => q.Id == question.Id,
                 "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
-            return _mapper.Map<QuestionResponse>(response.FirstOrDefault());
+            var answerResponse = response.FirstOrDefault()!.Answers.FirstOrDefault(a => a.Id == newAnswer.Id);
+            return _mapper.Map<AnswerResponse>(answerResponse);
         }
 
         public async Task<QuestionResponse> CreateQuestionAsync(CreateQuestionRequest request)

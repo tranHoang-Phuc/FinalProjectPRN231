@@ -85,13 +85,13 @@ namespace FptUOverflow.Api.Controllers
                 Data = baseResponse
             };
             return Ok(response);
-        }
+        }   
 
         [HttpPost("{id}/answers")]
         public async Task<IActionResult> CreateAnswer([FromRoute] Guid id, [FromBody]CreationAnswer answer )
         {
             var baseResponse = await _questionService.CreateAnswerAsync(id, answer);
-            var response = new BaseResponse<QuestionResponse>
+            var response = new BaseResponse<AnswerResponse>
             {
                 Data = baseResponse
             };
