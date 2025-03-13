@@ -104,6 +104,9 @@ namespace FptUOverflow.Api.Services
                         NormalizedEmail = userInfo.Email.ToUpper(),
                         PhoneNumber = "0000000000"
                     };
+                    var iFormFile = await DownloadImageAsFormFile(userInfo.Picture);
+                    var uploadResult = await _unitOfWork.CloudinaryRepository.UploadImage(iFormFile, iFormFile.FileName, "profile");
+                    newUser.ProfileImage = uploadResult.Url;
                     var result = await _userManager.CreateAsync(newUser);
                     await _userManager.AddToRoleAsync(newUser, "USER");
                     await _unitOfWork.SaveChangesAsync();
@@ -117,6 +120,28 @@ namespace FptUOverflow.Api.Services
                     ExpiresIn = 3600,
                 };
             }
+        }
+
+        private async Task<IFormFile> DownloadImageAsFormFile(string imageUrl)
+        {
+            using HttpClient client = new HttpClient();
+            var response = await client.GetAsync(imageUrl);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new AppException(ErrorCode.FileNotFound);
+            }
+
+            var content = await response.Content.ReadAsByteArrayAsync();
+            var fileName = Path.GetFileName(new Uri(imageUrl).AbsolutePath);
+
+            var stream = new MemoryStream(content);
+            var file = new FormFile(stream, 0, content.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = response.Content.Headers.ContentType?.ToString()
+            };
+
+            return file;
         }
     }
 }
