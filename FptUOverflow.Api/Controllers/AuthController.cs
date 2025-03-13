@@ -39,10 +39,10 @@ namespace FptUOverflow.Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
+        [HttpGet("How")]
         public IActionResult Get()
         {
-            return Ok("Hello");
+            return Ok("Ủa là sao ta, a Khum có hiểu. Khum hiểu thiệt á. Chắc e ý quá mệt mỏi vs tui gòi");
         }
     }
 }
