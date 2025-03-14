@@ -18,6 +18,13 @@ namespace FptUOverflow.Api.Mapper
                 .ForMember(dest => dest.TagName, opt => opt.MapFrom(src => src.Tag.TagName));
             CreateMap<CreateQuestionRequest, Question>();
             CreateMap<AnswerVote, AnswerVoteResponse>();
+            CreateMap<Tag, TagItemResponse>()
+                .ForMember(dest => dest.TagName, opt => opt.MapFrom(src => src.TagName))
+                .ForMember(dest => dest.NumberOfQuestions, opt => opt.MapFrom(src => src.QuestionTags.Count))
+                .ForMember(dest => dest.NumberOfQuestionsToday, opt => opt
+                    .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt == System.DateTime.Now.Date).Count()))
+                .ForMember(dest => dest.NumberOfQuestionThisWeek, opt => opt
+                    .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt >= System.DateTime.Now.Date.AddDays(-7)).Count()));
         }
     }
 }
