@@ -127,6 +127,7 @@ namespace FptUOverflow.Api
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IAnswerService, AnswerService>();
+            builder.Services.AddScoped<ITagService, TagService>();
             #endregion
 
             #region Helpers
