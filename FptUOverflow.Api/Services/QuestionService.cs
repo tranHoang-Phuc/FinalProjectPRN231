@@ -416,7 +416,8 @@ namespace FptUOverflow.Api.Services
 
         public async Task<AnswerResponse> UpdateAnswerAsync(Guid id, Guid answerId, UpdateAnswerRequest request)
         {
-            var questions = await _unitOfWork.QuestionRepository.GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
+            var questions = await _unitOfWork.QuestionRepository
+                .GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
             if (questions.FirstOrDefault() == null)
             {
                 throw new AppException(ErrorCode.NotFound);
@@ -437,7 +438,8 @@ namespace FptUOverflow.Api.Services
         public async Task<QuestionResponse> UpdateQuestionAsync(Guid id, UpdateQuestionRequest request)
         {
             var userId = GetUserId();         
-            var questions = await _unitOfWork.QuestionRepository.GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
+            var questions = await _unitOfWork.QuestionRepository
+                .GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
             if (questions.FirstOrDefault() == null)
             {
                 throw new AppException(ErrorCode.NotFound);
@@ -447,27 +449,30 @@ namespace FptUOverflow.Api.Services
             {
                 throw new AppException(ErrorCode.NotOwner);
             }
+            var questionTags  = await _unitOfWork.QuestionTagRepository.GetAllAsync(qt => qt.QuestionId == question.Id);
+
+            foreach (var questionTag in questionTags)
+            {
+                await _unitOfWork.QuestionTagRepository.DeleteAsync(questionTag);
+            }
+            await _unitOfWork.SaveChangesAsync();
             question.Title = request.Title;
             question.DetailProblem = request.DetailProblem;
             question.Expecting = request.Expecting;
             question.UpdatedAt = DateTime.Now;
 
-            var currentRemoveTags = question.QuestionTags.Where(qt => request.Tags.Contains(qt.Tag.TagName.Trim().ToLower())).ToList();
-            foreach (var tag in currentRemoveTags) { 
-                await _unitOfWork.QuestionTagRepository.DeleteAsync(tag);
-            }
-            var tags = request.Tags.Select(t => t.ToLower()).ToList();
             var existingTags = await _unitOfWork.TagRepository.GetAllAsync(
-                t => tags.Contains(t.TagName));
-            var newTags = tags.Except(existingTags.Select(t => t.TagName.ToLower()))
+                t => request.Tags.Contains(t.TagName));
+            var newTags = request.Tags.Except(existingTags.Select(t => t.TagName.ToLower()))
                 .Select(tagName => new Tag
                 {
                     Id = Guid.NewGuid(),
                     TagName = tagName,
-                    CreatedBy = GetUserId()
+                    CreatedBy = userId
                 }).ToList();
 
             await _unitOfWork.TagRepository.AddRangeAsync(newTags);
+            await _unitOfWork.QuestionRepository.AddAsync(question);
             await _unitOfWork.SaveChangesAsync();
             List<Tag> allTags = new List<Tag>();
             if (existingTags.Count() == newTags.Count())
@@ -479,11 +484,45 @@ namespace FptUOverflow.Api.Services
                 allTags = (await existingTags.ToListAsync()).Concat(newTags).ToList();
             }
 
+
             var questionTags = allTags.Select(t => new QuestionTag
             {
                 QuestionId = question.Id,
                 TagId = t.Id
             }).ToList();
+
+            //var currentRemoveTags = question.QuestionTags.Where(qt => request.Tags.Contains(qt.Tag.TagName.Trim().ToLower())).ToList();
+            //foreach (var tag in currentRemoveTags) { 
+            //    await _unitOfWork.QuestionTagRepository.DeleteAsync(tag);
+            //}
+            //var tags = request.Tags.Select(t => t.ToLower()).ToList();
+            //var existingTags = await _unitOfWork.TagRepository.GetAllAsync(
+            //    t => tags.Contains(t.TagName));
+            //var newTags = tags.Except(existingTags.Select(t => t.TagName.ToLower()))
+            //    .Select(tagName => new Tag
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        TagName = tagName,
+            //        CreatedBy = GetUserId()
+            //    }).ToList();
+
+            //await _unitOfWork.TagRepository.AddRangeAsync(newTags);
+            //await _unitOfWork.SaveChangesAsync();
+            //List<Tag> allTags = new List<Tag>();
+            //if (existingTags.Count() == newTags.Count())
+            //{
+            //    allTags = newTags;
+            //}
+            //else
+            //{
+            //    allTags = (await existingTags.ToListAsync()).Concat(newTags).ToList();
+            //}
+
+            //var questionTags = allTags.Select(t => new QuestionTag
+            //{
+            //    QuestionId = question.Id,
+            //    TagId = t.Id
+            //}).ToList();
             await _unitOfWork.QuestionTagRepository.AddRangeAsync(questionTags);
             await _unitOfWork.SaveChangesAsync();
             var response = await _unitOfWork.QuestionRepository
