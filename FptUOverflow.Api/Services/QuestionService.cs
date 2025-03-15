@@ -485,7 +485,7 @@ namespace FptUOverflow.Api.Services
             }
 
 
-            var questionTags = allTags.Select(t => new QuestionTag
+            var questionTagsAdd = allTags.Select(t => new QuestionTag
             {
                 QuestionId = question.Id,
                 TagId = t.Id
@@ -523,7 +523,7 @@ namespace FptUOverflow.Api.Services
             //    QuestionId = question.Id,
             //    TagId = t.Id
             //}).ToList();
-            await _unitOfWork.QuestionTagRepository.AddRangeAsync(questionTags);
+            await _unitOfWork.QuestionTagRepository.AddRangeAsync(questionTagsAdd);
             await _unitOfWork.SaveChangesAsync();
             var response = await _unitOfWork.QuestionRepository
                 .GetAllAsync(q => q.Id == question.Id,
