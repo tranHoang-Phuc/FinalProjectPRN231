@@ -18,10 +18,10 @@ namespace FptUOverflow.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTags(string? keyword)
+        public async Task<IActionResult> GetAllTags(string? keyword, int? pageIndex)
         {
-            var baseResponse = await _tagService.GetAllTagsAsync(keyword);
-            var response = new BaseResponse<List<TagItemResponse>>
+            var baseResponse = await _tagService.GetAllTagsAsync(keyword, pageIndex);
+            var response = new BaseResponse<TagListResponse>
             {
                 Data = baseResponse,
             };
