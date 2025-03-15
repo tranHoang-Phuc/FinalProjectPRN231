@@ -26,7 +26,7 @@ namespace FptUOverflow.Api.Services
 
             if(pageIndex == null)
             {
-                pageIndex = 1;
+                pageIndex = 0;
             }
 
             var tags = await _unitOfWork.TagRepository.GetAllAsync(tag => tag.TagName.Contains(keyword), "CreatedUser,QuestionTags.Question");
