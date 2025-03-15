@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
+using FptUOverflow.Api.Services.IServices;
 using FptUOverflow.Core.Exceptions;
 using FptUOverflow.Infra.EfCore.DataAccess;
 using FptUOverflow.Infra.EfCore.Dtos.Response;
 
-namespace FptUOverflow.Api.Services.IServices
+namespace FptUOverflow.Api.Services
 {
     public class TagService : ITagService
     {
@@ -16,11 +17,16 @@ namespace FptUOverflow.Api.Services.IServices
             _mapper = mapper;
         }
 
-        public async Task<List<TagItemResponse>> GetAllTagsAsync(string? keyword)
+        public async Task<TagListResponse> GetAllTagsAsync(string? keyword, int? pageIndex)
         {
             if (keyword == null)
             {
                 keyword = "";
+            }
+
+            if(pageIndex == null)
+            {
+                pageIndex = 1;
             }
 
             var tags = await _unitOfWork.TagRepository.GetAllAsync(tag => tag.TagName.Contains(keyword), "CreatedUser,QuestionTags.Question");
@@ -32,7 +38,14 @@ namespace FptUOverflow.Api.Services.IServices
 
             var mappedTags = _mapper.Map<List<TagItemResponse>>(tags);
 
-            return mappedTags.OrderByDescending(tag => tag.NumberOfQuestions).Take(16).ToList();
+            var response = new TagListResponse
+            {
+                Tags = mappedTags.OrderByDescending(tag => tag.NumberOfQuestions).Take(16).ToList(),
+                TotalPage = mappedTags.Count,
+                CurrentPage = pageIndex.Value
+            };
+
+            return response;
         }
 
     }
