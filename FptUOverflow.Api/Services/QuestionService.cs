@@ -436,16 +436,22 @@ namespace FptUOverflow.Api.Services
 
         public async Task<QuestionResponse> UpdateQuestionAsync(Guid id, UpdateQuestionRequest request)
         {
+            var userId = GetUserId();         
             var questions = await _unitOfWork.QuestionRepository.GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
             if (questions.FirstOrDefault() == null)
             {
                 throw new AppException(ErrorCode.NotFound);
             }
             var question = questions.FirstOrDefault();
+            if(userId != question!.CreatedBy)
+            {
+                throw new AppException(ErrorCode.NotOwner);
+            }
             question.Title = request.Title;
             question.DetailProblem = request.DetailProblem;
             question.Expecting = request.Expecting;
             question.UpdatedAt = DateTime.Now;
+
             var currentRemoveTags = question.QuestionTags.Where(qt => request.Tags.Contains(qt.Tag.TagName.Trim().ToLower())).ToList();
             foreach (var tag in currentRemoveTags) { 
                 await _unitOfWork.QuestionTagRepository.DeleteAsync(tag);
