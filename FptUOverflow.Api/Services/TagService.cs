@@ -26,7 +26,7 @@ namespace FptUOverflow.Api.Services
 
             if(pageIndex == null)
             {
-                pageIndex = 0;
+                pageIndex = 1;
             }
 
             var tags = await _unitOfWork.TagRepository.GetAllAsync(tag => tag.TagName.Contains(keyword), "CreatedUser,QuestionTags.Question");
@@ -40,7 +40,7 @@ namespace FptUOverflow.Api.Services
 
             var response = new TagListResponse
             {
-                Tags = mappedTags.OrderByDescending(tag => tag.NumberOfQuestions).Skip(pageIndex.Value * 16).Take(16).ToList(),
+                Tags = mappedTags.OrderByDescending(tag => tag.NumberOfQuestions).Skip((pageIndex.Value - 1) * 16).Take(16).ToList(),
                 TotalPage = mappedTags.Count % 16 == 0 ? mappedTags.Count / 16 : mappedTags.Count /16 + 1,
                 CurrentPage = pageIndex.Value
             };
