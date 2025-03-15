@@ -472,7 +472,6 @@ namespace FptUOverflow.Api.Services
                 }).ToList();
 
             await _unitOfWork.TagRepository.AddRangeAsync(newTags);
-            await _unitOfWork.QuestionRepository.AddAsync(question);
             await _unitOfWork.SaveChangesAsync();
             List<Tag> allTags = new List<Tag>();
             if (existingTags.Count() == newTags.Count())
