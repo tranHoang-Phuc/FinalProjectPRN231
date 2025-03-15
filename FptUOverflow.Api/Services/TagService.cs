@@ -41,7 +41,7 @@ namespace FptUOverflow.Api.Services
             var response = new TagListResponse
             {
                 Tags = mappedTags.OrderByDescending(tag => tag.NumberOfQuestions).Take(16).ToList(),
-                TotalPage = mappedTags.Count / 16,
+                TotalPage = mappedTags.Count % 16 == 0 ? mappedTags.Count / 16 : mappedTags.Count /16 + 1,
                 CurrentPage = pageIndex.Value
             };
 
