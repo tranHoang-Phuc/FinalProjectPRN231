@@ -50,6 +50,16 @@ namespace FptUOverflow.Api.Services
             return _mapper.Map<AnswerResponse>(answer);
         }
 
+        public async Task<AnswerResponse> GetAnswerByIdAsync(Guid id)
+        {
+            var answers = await _unitOfWork.AnswerRepository.GetAllAsync(a => a.Id == id, "Question,CreatedUser,AnswerVotes");
+            if (answers.FirstOrDefault() == null)
+            {
+                throw new AppException(ErrorCode.NotFound);
+            }
+            return _mapper.Map<AnswerResponse>(answers.FirstOrDefault());
+        }
+
         public async Task<AnswerResponse> VoteAnswerAsync(Guid id, string mode)
         {
             var answer = await _unitOfWork.AnswerRepository.GetAllAsync(a => a.Id == id, "AnswerVotes");
