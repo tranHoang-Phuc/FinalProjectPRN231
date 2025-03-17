@@ -6,6 +6,7 @@ using FptUOverflow.Infra.EfCore.Dtos.Request;
 using FptUOverflow.Infra.EfCore.Dtos.Response;
 using FptUOverflow.Infra.EfCore.Models;
 using FptUOverflow.Infra.EfCore.Repositories.IRepositories;
+using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.IdentityModel.Tokens;
@@ -145,6 +146,17 @@ namespace FptUOverflow.Api.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
+        private List<string> GetImageUrl(string html)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var urls = doc.DocumentNode.Descendants("img")
+                .Select(e => e.GetAttributeValue("src", null))
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
+            return urls;
+        }
         public async Task DeleteQuestionAsync(Guid id)
         {
             var questions = await _unitOfWork.QuestionRepository.GetAllAsync(q => q.Id == id, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
@@ -153,7 +165,16 @@ namespace FptUOverflow.Api.Services
                 throw new AppException(ErrorCode.NotFound);
             }
             var question = questions.FirstOrDefault();
-
+            var problemImageUrl = GetImageUrl(question!.DetailProblem);
+            foreach (var url in problemImageUrl)
+            {
+                await DeleteImageAsync(url);
+            }
+            var expectingImageUrl = GetImageUrl(question!.Expecting!);
+            foreach (var url in expectingImageUrl)
+            {
+                await DeleteImageAsync(url);
+            }
             var answers = await _unitOfWork.AnswerRepository.GetAllAsync(a => a.QuestionId == question!.Id, "AnswerVotes");
             if (answers.FirstOrDefault() != null)
             {
@@ -161,7 +182,13 @@ namespace FptUOverflow.Api.Services
                 {
                     foreach (var vote in answer.AnswerVotes)
                     {
+                 
                         await _unitOfWork.AnswerVoteRepository.DeleteAsync(vote);
+                    }
+                    var answerImageUrl = GetImageUrl(answer.Content);
+                    foreach (var url in answerImageUrl)
+                    {
+                        await DeleteImageAsync(url);
                     }
                     await _unitOfWork.AnswerRepository.DeleteAsync(answer);
                 }
