@@ -214,7 +214,10 @@ namespace FptUOverflow.Api.Services
             await _unitOfWork.QuestionRepository.DeleteAsync(question);
             await _unitOfWork.SaveChangesAsync();
         }
-
+        private string Test()
+        {
+            return "a";
+        }
         public async Task<QuestionResponse> GetQuestionByIdAsync(Guid id)
         {
             var questions = await _unitOfWork.QuestionRepository
