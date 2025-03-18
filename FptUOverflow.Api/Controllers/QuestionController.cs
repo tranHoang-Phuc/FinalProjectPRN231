@@ -114,8 +114,6 @@ namespace FptUOverflow.Api.Controllers
         {
             await _questionService.DeleteAnswerAsync(id, answerId);
             return NoContent();
-        }
-
-        
+        }        
     }
 }
