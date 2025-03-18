@@ -41,8 +41,13 @@ namespace FptUOverflow.Api.Services
                 throw new AppException(ErrorCode.Unauthorized);
             }
             var user = (await _unitOfWork.ApplicationUserRepository.GetAllAsync(u => u.Id == userId)).FirstOrDefault();
-            _mapper.Map(request, user);
-
+            user!.DisplayName = request.DisplayName;
+            user!.Location = request.Location;
+            user!.Title = request.Title;
+            user!.AboutMe = request.AboutMe;
+            await _unitOfWork.ApplicationUserRepository.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<ProfileResponse>(user);
         }
 
         public async Task<ProfileImageResponse> UpdateProfileImageAsync(IFormFile file)
