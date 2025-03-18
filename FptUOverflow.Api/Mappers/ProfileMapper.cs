@@ -2,7 +2,6 @@
 using FptUOverflow.Infra.EfCore.Dtos.Request;
 using FptUOverflow.Infra.EfCore.Dtos.Response;
 using FptUOverflow.Infra.EfCore.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace FptUOverflow.Api.Mapper
 {
@@ -25,6 +24,8 @@ namespace FptUOverflow.Api.Mapper
                     .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt == System.DateTime.Now.Date).Count()))
                 .ForMember(dest => dest.NumberOfQuestionThisWeek, opt => opt
                     .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt >= System.DateTime.Now.Date.AddDays(-7)).Count()));
+            CreateMap<ApplicationUser, ProfileResponse>();
+            CreateMap<UpdateProfileRequest, ApplicationUser>();
         }
     }
 }

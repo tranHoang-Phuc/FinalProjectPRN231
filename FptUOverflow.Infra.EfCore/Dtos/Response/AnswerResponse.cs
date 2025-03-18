@@ -18,6 +18,5 @@ namespace FptUOverflow.Infra.EfCore.Dtos.Response
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public virtual ICollection<AnswerVoteResponse> AnswerVotes { get; set; }
-
     }
 }
