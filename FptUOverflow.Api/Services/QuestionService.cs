@@ -492,14 +492,23 @@ namespace FptUOverflow.Api.Services
             question.UpdatedAt = DateTime.Now;
 
             var existingTags = await _unitOfWork.TagRepository.GetAllAsync(
-                t => request.Tags.Contains(t.TagName));
-            var newTags = request.Tags.Except(existingTags.Select(t => t.TagName.ToLower()))
+                t => request.Tags.Select(tag => tag.ToLower()).Contains(t.TagName.ToLower()));
+
+            var existingTagNames = new HashSet<string>(existingTags.Select(t => t.TagName.ToLower()));
+
+            var newTags = request.Tags
+                .Select(tag => tag.ToLower()) 
+                .Except(existingTagNames)
                 .Select(tagName => new Tag
                 {
                     Id = Guid.NewGuid(),
                     TagName = tagName,
                     CreatedBy = userId
                 }).ToList();
+
+            var addedNewTags = await _unitOfWork.TagRepository.GetAllAsync(t =>
+                !newTags.Any(nt => t.TagName.ToLower().Contains(nt.TagName.ToLower())));
+
 
             await _unitOfWork.TagRepository.AddRangeAsync(newTags);
             await _unitOfWork.SaveChangesAsync();
