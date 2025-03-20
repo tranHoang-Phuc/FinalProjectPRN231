@@ -60,5 +60,15 @@ namespace FptUOverflow.Api.Controllers
             };
             return Ok(response);
         }
+        [HttpGet("author/{alias}")]
+        public async Task<IActionResult> GetAuthorByAlias(string alias)
+        {
+            var baseResponse = await _profileService.GetAuthorByAliasAsync(alias);
+            var response = new BaseResponse<ProfileResponse>
+            {
+                Data = baseResponse
+            };
+            return Ok(response);
+        }
     }
 }
