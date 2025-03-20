@@ -49,5 +49,16 @@ namespace FptUOverflow.Api.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet("Authors")]
+        public async Task<IActionResult> GetAuthors(int? pageIndex)
+        {
+            var baseResponse = await _profileService.GetAuthorsAsync(pageIndex);
+            var response = new BaseResponse<PagedResponse<ProfileResponse>>
+            {
+                Data = baseResponse
+            };
+            return Ok(response);
+        }
     }
 }

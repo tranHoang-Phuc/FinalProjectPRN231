@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FptUOverflow.Api.Services.IServices;
+using FptUOverflow.Core.CoreObjects;
 using FptUOverflow.Core.Exceptions;
 using FptUOverflow.Infra.EfCore.DataAccess;
 using FptUOverflow.Infra.EfCore.Dtos.Request;
@@ -20,6 +21,23 @@ namespace FptUOverflow.Api.Services
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
+        }
+
+        public async Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex)
+        {
+            if(pageIndex == null)
+            {
+                pageIndex = 1;
+            }
+            var users = await _unitOfWork.ApplicationUserRepository.GetAllAsync(null, "QuestionVotes");
+            int totalPage = users.Count() % 16 ==0 ? users.Count() / 16 : users.Count() / 16 + 1;
+            users = users.Skip((pageIndex.Value - 1) * 16).Take(16);
+            return new PagedResponse<ProfileResponse>
+            {
+                Data = _mapper.Map<List<ProfileResponse>>(users),
+                PageIndex = pageIndex.Value,              
+                TotalPage = totalPage
+            };
         }
 
         public async Task<ProfileResponse> GetProfileAsync()
