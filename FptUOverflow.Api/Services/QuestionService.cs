@@ -529,37 +529,7 @@ namespace FptUOverflow.Api.Services
                 TagId = t.Id
             }).ToList();
 
-            //var currentRemoveTags = question.QuestionTags.Where(qt => request.Tags.Contains(qt.Tag.TagName.Trim().ToLower())).ToList();
-            //foreach (var tag in currentRemoveTags) { 
-            //    await _unitOfWork.QuestionTagRepository.DeleteAsync(tag);
-            //}
-            //var tags = request.Tags.Select(t => t.ToLower()).ToList();
-            //var existingTags = await _unitOfWork.TagRepository.GetAllAsync(
-            //    t => tags.Contains(t.TagName));
-            //var newTags = tags.Except(existingTags.Select(t => t.TagName.ToLower()))
-            //    .Select(tagName => new Tag
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        TagName = tagName,
-            //        CreatedBy = GetUserId()
-            //    }).ToList();
-
-            //await _unitOfWork.TagRepository.AddRangeAsync(newTags);
-            //await _unitOfWork.SaveChangesAsync();
-            //List<Tag> allTags = new List<Tag>();
-            //if (existingTags.Count() == newTags.Count())
-            //{
-            //    allTags = newTags;
-            //}
-            //else
-            //{
-            //    allTags = (await existingTags.ToListAsync()).Concat(newTags).ToList();
-            //}
-
-            //var questionTags = allTags.Select(t => new QuestionTag
-            //{
-            //    QuestionId = question.Id,
-            //    TagId = t.Id
+           
             //}).ToList();
             await _unitOfWork.QuestionTagRepository.AddRangeAsync(questionTagsAdd);
             await _unitOfWork.SaveChangesAsync();
