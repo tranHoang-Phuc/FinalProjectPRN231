@@ -23,6 +23,16 @@ namespace FptUOverflow.Api.Services
             _mapper = mapper;
         }
 
+        public async Task<ProfileResponse> GetAuthorByAliasAsync(string alias)
+        {
+            var user = (await _unitOfWork.ApplicationUserRepository.GetAllAsync(u => u.Email.StartsWith(alias + "@"))).FirstOrDefault();
+            if (user == null)
+            {
+                throw new AppException(ErrorCode.NotFound);
+            }
+            return _mapper.Map<ProfileResponse>(user);
+        }
+
         public async Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex)
         {
             if(pageIndex == null)
