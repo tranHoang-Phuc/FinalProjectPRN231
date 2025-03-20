@@ -24,7 +24,8 @@ namespace FptUOverflow.Api.Mapper
                     .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt == System.DateTime.Now.Date).Count()))
                 .ForMember(dest => dest.NumberOfQuestionThisWeek, opt => opt
                     .MapFrom(src => src.QuestionTags.Where(qt => qt.Question.CreatedAt >= System.DateTime.Now.Date.AddDays(-7)).Count()));
-            CreateMap<ApplicationUser, ProfileResponse>();
+            CreateMap<ApplicationUser, ProfileResponse>()
+                .ForMember(dest => dest.TotalVote, opt => opt.MapFrom(src => src.QuestionVotes != null ? src.QuestionVotes.Count() : (int?)null));
             CreateMap<UpdateProfileRequest, ApplicationUser>();
         }
     }
