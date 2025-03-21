@@ -10,6 +10,6 @@ namespace FptUOverflow.Api.Services.IServices
         Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex);
         Task<ProfileResponse> GetProfileAsync();
         Task<ProfileResponse> UpdateProfileAsync(UpdateProfileRequest request);
-        Task<ProfileImageResponse> UpdateProfileImageAsync(IFormFile file);
+        Task<ProfileResponse> UpdateProfileImageAsync(IFormFile file);
     }
 }
