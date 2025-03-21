@@ -30,7 +30,7 @@ namespace FptUOverflow.Api.Controllers
         }
 
         [HttpPut("Image")]
-        public async Task<IActionResult> UpdateProfileImage([FromBody] UpdateProfileImageRequest request)
+        public async Task<IActionResult> UpdateProfileImage([FromForm] UpdateProfileImageRequest request)
         {
             var baseResponse = await _profileService.UpdateProfileImageAsync(request.Image);
             var response = new BaseResponse<ProfileResponse>
