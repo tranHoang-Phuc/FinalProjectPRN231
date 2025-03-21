@@ -101,6 +101,7 @@ namespace FptUOverflow.Api.Services
 
             };
             return _mapper.Map<ProfileResponse>(user);
+
         }
 
         private string GetUserId()
