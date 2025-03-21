@@ -78,7 +78,7 @@ namespace FptUOverflow.Api.Services
             return _mapper.Map<ProfileResponse>(user);
         }
 
-        public async Task<ProfileImageResponse> UpdateProfileImageAsync(IFormFile file)
+        public async Task<ProfileResponse> UpdateProfileImageAsync(IFormFile file)
         {
             var userId = GetUserId();
             if (userId == null)
@@ -100,10 +100,7 @@ namespace FptUOverflow.Api.Services
                 Url = uploadResult.Url,
 
             };
-            return new ProfileImageResponse
-            {
-                Url = uploadResult.Url
-            };
+            return _mapper.Map<ProfileResponse>(user);
         }
 
         private string GetUserId()
