@@ -44,7 +44,7 @@ namespace FptUOverflow.Api.Services
             users = users.Skip((pageIndex.Value - 1) * 16).Take(16);
             return new PagedResponse<ProfileResponse>
             {
-                Data = _mapper.Map<List<ProfileResponse>>(users),
+                Data = _mapper.Map<List<ProfileResponse>>(users.OrderBy(o => o.QuestionVotes.Count())),
                 PageIndex = pageIndex.Value,              
                 TotalPage = totalPage
             };
