@@ -17,5 +17,6 @@ namespace FptUOverflow.Infra.EfCore.Dtos.Response
         public string? ProfileImage { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? TotalVote { get; set; }
+        public string AliasName { get; set; }
     }
 }
