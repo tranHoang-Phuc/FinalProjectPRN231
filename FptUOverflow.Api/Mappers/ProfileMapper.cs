@@ -9,7 +9,8 @@ namespace FptUOverflow.Api.Mapper
     {
         public ProfileMapper()
         {
-            CreateMap<ApplicationUser, ApplicationUserResponse>();
+            CreateMap<ApplicationUser, ApplicationUserResponse>()
+                .ForMember(dest => dest.AliasName, opt => opt.MapFrom(src => src.Email.Substring(0, src.Email.IndexOf("@"))));
             CreateMap<Answer, AnswerResponse>();
             CreateMap<QuestionVote, QuestionVoteResponse>();
             CreateMap<Question, QuestionResponse>();
