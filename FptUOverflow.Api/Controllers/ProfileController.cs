@@ -51,7 +51,7 @@ namespace FptUOverflow.Api.Controllers
         }
 
         [HttpGet("Authors")]
-        public async Task<IActionResult> GetAuthors(int? pageIndex)
+        public async Task<IActionResult> GetAuthors(int? pageIndex, string? aliasName)
         {
             var baseResponse = await _profileService.GetAuthorsAsync(pageIndex);
             var response = new BaseResponse<PagedResponse<ProfileResponse>>

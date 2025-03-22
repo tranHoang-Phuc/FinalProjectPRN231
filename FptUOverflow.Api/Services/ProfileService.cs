@@ -33,13 +33,17 @@ namespace FptUOverflow.Api.Services
             return _mapper.Map<ProfileResponse>(user);
         }
 
-        public async Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex)
+        public async Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex, string? aliasName)
         {
             if(pageIndex == null)
             {
                 pageIndex = 1;
             }
             var users = await _unitOfWork.ApplicationUserRepository.GetAllAsync(null, "QuestionVotes");
+            if (aliasName != null)
+            {
+                users = users.Where(u => u.Email.Substring(0, u.Email.IndexOf("@")).Contains(aliasName));
+            }
             int totalPage = users.Count() % 16 ==0 ? users.Count() / 16 : users.Count() / 16 + 1;
             users = users.Skip((pageIndex.Value - 1) * 16).Take(16);
             return new PagedResponse<ProfileResponse>
