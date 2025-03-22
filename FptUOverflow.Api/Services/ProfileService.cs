@@ -35,7 +35,8 @@ namespace FptUOverflow.Api.Services
 
         public async Task<PagedResponse<ProfileResponse>> GetAuthorsAsync(int? pageIndex, string? aliasName)
         {
-            if(pageIndex == null)
+            var userId = GetUserId();
+            if (pageIndex == null)
             {
                 pageIndex = 1;
             }
@@ -44,6 +45,7 @@ namespace FptUOverflow.Api.Services
             {
                 users = users.Where(u => u.Email.Substring(0, u.Email.IndexOf("@")).Contains(aliasName));
             }
+            users = users.Except(users.Where(u => u.Id == userId));
             int totalPage = users.Count() % 16 ==0 ? users.Count() / 16 : users.Count() / 16 + 1;
             users = users.Skip((pageIndex.Value - 1) * 16).Take(16);
             return new PagedResponse<ProfileResponse>
