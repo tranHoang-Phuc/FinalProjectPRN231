@@ -10,6 +10,7 @@ using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
@@ -21,12 +22,14 @@ namespace FptUOverflow.Api.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper;
-        
-        public QuestionService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        private readonly ISSEService _sseService;
+
+        public QuestionService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, IMapper mapper, ISSEService sSEService)
         {
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
+            _sseService = sSEService;
         }
 
         
@@ -57,6 +60,32 @@ namespace FptUOverflow.Api.Services
                 .GetAllAsync(q => q.Id == question.Id,
                 "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
             var answerResponse = response.FirstOrDefault()!.Answers.FirstOrDefault(a => a.Id == newAnswer.Id);
+            Notification notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.Now,
+                CreatedUserId = userId,
+                QuestionId = question.Id,
+                Type = 1
+            };
+            await _unitOfWork.NotificationRepository.AddAsync(notification);
+            await _unitOfWork.SaveChangesAsync();
+
+            HashSet<string> userIds = new HashSet<string>();
+            userIds.Add(question.CreatedBy);
+            foreach (var item in questions!.FirstOrDefault()!.Answers)
+            {
+                userIds.Add(item.CreatedBy!);
+            }
+            userIds.Remove(userId);
+            var addedNotification = await _unitOfWork.NotificationRepository.GetAllAsync(n => n.Id == notification.Id, "CreatedUser,Question");
+            var notificationDto = _mapper.Map<NotificationResponse>(addedNotification.FirstOrDefault()!);
+            var data = JsonConvert.SerializeObject(notificationDto);
+            foreach (var item in userIds)
+            {
+                await _sseService.SendEventToUser(Guid.Parse(item), JsonConvert.SerializeObject(notificationDto));
+            }
+
             return _mapper.Map<AnswerResponse>(answerResponse);
         }
 
@@ -214,10 +243,7 @@ namespace FptUOverflow.Api.Services
             await _unitOfWork.QuestionRepository.DeleteAsync(question);
             await _unitOfWork.SaveChangesAsync();
         }
-        private string Test()
-        {
-            return "a";
-        }
+       
         public async Task<QuestionResponse> GetQuestionByIdAsync(Guid id)
         {
             var questions = await _unitOfWork.QuestionRepository
@@ -299,12 +325,17 @@ namespace FptUOverflow.Api.Services
                 {
                     questions = questions.Where(q => q.Answers.Count() == 0);
                 }
-                
-                MatchCollection matches = Regex.Matches(search, @"""([^""]+)""");
-                if (matches.Count() > 0)
+
+                MatchCollection matches = Regex.Matches(search, @"""(.*?)""");
+
+                if (matches.Count > 0)
                 {
-                    questions = questions.Where(q =>
-                        matches.Cast<Match>().Any(m => q.Title.Contains(m.Groups[1].Value)));
+                    questions = questions.AsEnumerable()
+                        .Where(q => matches.Cast<Match>().Any(m =>
+                            q.Title.Contains(m.Groups[1].Value.Trim()) ||
+                            (q.DetailProblem + q.Expecting).Contains(m.Groups[1].Value.Trim())
+                        ))
+                        .AsQueryable();
                 }
 
                 MatchCollection matchesAnswer = Regex.Matches(search, @"score:\s*(\d+)");
@@ -314,13 +345,13 @@ namespace FptUOverflow.Api.Services
                     questions = questions.Where(q => q.QuestionVotes.Count >= score);
                 }
 
-                MatchCollection matchesUser = Regex.Matches(search, @"user:[a-zA-Z0-9_-]+$");
+                MatchCollection matchesUser = Regex.Matches(search, @"user:([a-zA-Z0-9._-]+)");
                 if (matchesUser.Count > 0)
                 {
                     var user = matchesUser[0].Value.Split(":")[1];
                     questions = questions.Where(q => q.CreatedUser.Email.Contains(user));
                 }
-                Match match = Regex.Match(search, @"^\[tag\]\s+(.+)$");
+                Match match = Regex.Match(search, @".*\[tag\]\s+(.+)");
                 if (match.Success)
                 {
                     string tagsSearch = match.Groups[1].Value;
@@ -607,7 +638,7 @@ namespace FptUOverflow.Api.Services
             return _httpContextAccessor!.HttpContext!.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         }
 
-        public async Task<QuestionResponseList> GetAskedQuestion(string? aliasName)
+        public async Task<QuestionResponseList> GetAskedQuestion(string aliasName)
         {
             var userId = GetUserId();
             if (aliasName == null)
@@ -616,7 +647,7 @@ namespace FptUOverflow.Api.Services
                     .GetAllAsync(q => q.CreatedBy == userId, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
                 return new QuestionResponseList
                 {
-                    Questions = _mapper.Map<List<QuestionResponse>>(questions.ToList()),
+                    Questions = _mapper.Map<List<QuestionResponse>>(questions.OrderByDescending(q => q.CreatedAt).ToList()),
                     Total = questions.Count()
                 };
             } 
@@ -626,10 +657,30 @@ namespace FptUOverflow.Api.Services
                     .GetAllAsync(q => q.CreatedUser.Email.Contains(aliasName), "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
                 return new QuestionResponseList
                 {
-                    Questions = _mapper.Map<List<QuestionResponse>>(questions.ToList()),
+                    Questions = _mapper.Map<List<QuestionResponse>>(questions.OrderBy(q => q.CreatedAt).ToList()),
                     Total = questions.Count()
                 };
             }
+        }
+
+        public async Task<QuestionResponseList> GetAnsweredQuestion(string? aliasName)
+        {
+            var questions = await _unitOfWork.QuestionRepository
+                    .GetAllAsync(null, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
+            var userId = GetUserId();
+            if (aliasName == null)
+            {
+                questions = questions.Where(q => q.Answers.Any(a => a.CreatedBy == userId));
+            } 
+            else
+            {
+                questions = questions.Where(q => q.Answers.Any(a => a.CreatedUser.Email.Contains(aliasName)));
+            }
+            return new QuestionResponseList
+            {
+                Questions = _mapper.Map<List<QuestionResponse>>(questions.OrderBy(q => q.CreatedAt).ToList()),
+                Total = questions.Count()
+            };
         }
     }
 }

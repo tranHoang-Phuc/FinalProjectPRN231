@@ -25,6 +25,7 @@ namespace FptUOverflow.Infra.EfCore.DataAccess
         public DbSet<AnswerVote> AnswerVotes { get; set; }
         public DbSet<ImageUpload> Images { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -181,6 +182,29 @@ namespace FptUOverflow.Infra.EfCore.DataAccess
                 entity.Property(e => e.CreatedAt)
                     .IsRequired();
                 entity.Property(e => e.UpdatedAt)
+                    .IsRequired();
+            });
+
+            builder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+                entity.Property(e => e.CreatedAt)
+                    .IsRequired();
+                entity.Property(e => e.CreatedUserId)
+                    .IsRequired();
+                entity.HasOne(e => e.CreatedUser)
+                    .WithMany(e => e.Notifications)
+                    .HasForeignKey(e => e.CreatedUserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                entity.Property(e => e.QuestionId)
+                    .IsRequired();
+                entity.HasOne(e => e.Question)
+                    .WithMany(e => e.Notifications)
+                    .HasForeignKey(e => e.QuestionId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                entity.Property(e => e.Type)
                     .IsRequired();
             });
         }

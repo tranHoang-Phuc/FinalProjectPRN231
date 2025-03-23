@@ -127,5 +127,16 @@ namespace FptUOverflow.Api.Controllers
             };
             return Ok(response);
         }
+        [HttpGet("answered")]
+        public async Task<IActionResult> GetAnsweredQuestion(string? aliasName)
+        {
+            var baseResponse = await _questionService.GetAnsweredQuestion(aliasName);
+            var response = new BaseResponse<QuestionResponseList>
+            {
+                Data = baseResponse
+            };
+            return Ok(response);
+        }
+
     }
 }

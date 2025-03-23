@@ -22,6 +22,7 @@ namespace FptUOverflow.Infra.EfCore.DataAccess
         ITagUserRepository TagUserRepository { get; }
         ICloudinaryRepository CloudinaryRepository { get; }
         IImageUploadRepository ImageUploadRepository { get; }
+        INotificationRepository NotificationRepository { get; }
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

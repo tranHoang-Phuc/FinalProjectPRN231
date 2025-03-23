@@ -20,5 +20,6 @@ namespace FptUOverflow.Infra.EfCore.Models
         public virtual ICollection<Tag> Tags { get; set; }
         public virtual ICollection<Answer> Answers { get; set; }
         public virtual ICollection<AnswerVote> AnswerVotes { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
     }
 }
