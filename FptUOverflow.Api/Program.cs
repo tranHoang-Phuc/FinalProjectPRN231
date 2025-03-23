@@ -100,7 +100,7 @@ namespace FptUOverflow.Api
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    policy => policy.WithOrigins("http://localhost:3000")
+                    policy => policy.WithOrigins("https://final-project-prn231-fe.vercel.app")
                                     .AllowAnyMethod()
                                     .AllowAnyHeader()
                     );
