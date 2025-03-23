@@ -104,6 +104,12 @@ namespace FptUOverflow.Api
                                     .AllowAnyMethod()
                                     .AllowAnyHeader()
                     );
+
+                options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin()
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader()
+                    );
             });
             #endregion
 
@@ -166,7 +172,7 @@ namespace FptUOverflow.Api
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("CorsPolicy");
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
