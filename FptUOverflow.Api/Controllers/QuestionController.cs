@@ -7,6 +7,7 @@ using FptUOverflow.Infra.EfCore.Dtos.Response;
 using FptUOverflow.Infra.EfCore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace FptUOverflow.Api.Controllers
 {
@@ -114,6 +115,17 @@ namespace FptUOverflow.Api.Controllers
         {
             await _questionService.DeleteAnswerAsync(id, answerId);
             return NoContent();
-        }        
+        }
+
+        [HttpGet("asked")]
+        public async Task<IActionResult> GetAskedQuestion(string? aliasName)
+        {
+            var baseResponse =  await _questionService.GetAskedQuestion(aliasName);
+            var response = new BaseResponse<QuestionResponseList>
+            {
+                Data = baseResponse
+            };
+            return Ok(response);
+        }
     }
 }

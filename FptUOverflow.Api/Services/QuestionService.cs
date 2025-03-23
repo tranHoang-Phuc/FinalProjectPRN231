@@ -606,5 +606,30 @@ namespace FptUOverflow.Api.Services
         {
             return _httpContextAccessor!.HttpContext!.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         }
+
+        public async Task<QuestionResponseList> GetAskedQuestion(string? aliasName)
+        {
+            var userId = GetUserId();
+            if (aliasName == null)
+            {
+                var questions = await _unitOfWork.QuestionRepository
+                    .GetAllAsync(q => q.CreatedBy == userId, "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
+                return new QuestionResponseList
+                {
+                    Questions = _mapper.Map<List<QuestionResponse>>(questions.ToList()),
+                    Total = questions.Count()
+                };
+            } 
+            else
+            {
+                var questions = await _unitOfWork.QuestionRepository
+                    .GetAllAsync(q => q.CreatedUser.Email.Contains(aliasName), "CreatedUser,Answers,QuestionVotes,QuestionTags.Tag");
+                return new QuestionResponseList
+                {
+                    Questions = _mapper.Map<List<QuestionResponse>>(questions.ToList()),
+                    Total = questions.Count()
+                };
+            }
+        }
     }
 }
