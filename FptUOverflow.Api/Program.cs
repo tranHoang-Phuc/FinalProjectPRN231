@@ -121,6 +121,7 @@ namespace FptUOverflow.Api
             builder.Services.AddScoped<ICloudinaryRepository, CloudinaryRepository>();
             builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
             builder.Services.AddScoped<IImageUploadRepository, ImageUploadRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             #endregion
 
             #region Services
@@ -129,6 +130,7 @@ namespace FptUOverflow.Api
             builder.Services.AddScoped<IAnswerService, AnswerService>();
             builder.Services.AddScoped<ITagService, TagService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddSingleton<ISSEService, SSEService>();
             #endregion
 
             #region Helpers

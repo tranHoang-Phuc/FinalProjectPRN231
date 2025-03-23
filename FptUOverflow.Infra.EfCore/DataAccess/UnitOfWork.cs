@@ -25,6 +25,7 @@ namespace FptUOverflow.Infra.EfCore.DataAccess
         private ITagUserRepository _tagUserRepository;
         private ICloudinaryRepository _cloudinaryRepository;
         private IImageUploadRepository _imageUploadRepository;
+        private INotificationRepository _notificationRepository;
 
         public UnitOfWork(AppDbContext context, IServiceProvider serviceProvider)
         {
@@ -54,6 +55,7 @@ namespace FptUOverflow.Infra.EfCore.DataAccess
 
         public IImageUploadRepository ImageUploadRepository => _imageUploadRepository ??= new ImageUploadRepository(_context);
 
+        public INotificationRepository NotificationRepository => _notificationRepository ??= new NotificationRepository(_context);
 
         public async Task BeginTransactionAsync()
         {

@@ -97,7 +97,6 @@ namespace FptUOverflow.Api.Services
 
             var currentImage = (await _unitOfWork.ImageUploadRepository.GetAllAsync(i => i.Url == user.ProfileImage)).FirstOrDefault();
 
-            await _unitOfWork.CloudinaryRepository.DeleteImage(currentImage!.PublicId);
 
             user!.ProfileImage = uploadResult.Url;
             var imageUpload = new ImageUpload

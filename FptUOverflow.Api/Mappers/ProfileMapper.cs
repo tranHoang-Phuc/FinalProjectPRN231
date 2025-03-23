@@ -29,6 +29,7 @@ namespace FptUOverflow.Api.Mapper
                 .ForMember(dest => dest.TotalVote, opt => opt.MapFrom(src => src.QuestionVotes != null ? src.QuestionVotes.Count() : (int?)null))
                 .ForMember(dest => dest.AliasName, opt => opt.MapFrom(src => src.Email.Substring(0, src.Email.IndexOf("@"))));
             CreateMap<UpdateProfileRequest, ApplicationUser>();
+            CreateMap<Notification, NotificationResponse>();
         }
     }
 }

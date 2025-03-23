@@ -11,7 +11,8 @@ namespace FptUOverflow.Api.Services.IServices
         Task DeleteAnswerAsync(Guid id, Guid answerId);
         Task DeleteImageAsync(string url);
         Task DeleteQuestionAsync(Guid id);
-        Task<QuestionResponseList> GetAskedQuestion(string? aliasName);
+        Task<QuestionResponseList> GetAnsweredQuestion(string? aliasName);
+        Task<QuestionResponseList> GetAskedQuestion(string aliasName);
         Task<QuestionResponse> GetQuestionByIdAsync(Guid id);
         Task<QuestionResponseList> GetQuestionsAsync(int? pageIndex, string[]? filter, string[]? tags, string? order, string? search, int pageSize);
         Task<QuestionCount> GetQuestionsCountAsync(int? pageIndex, string[]? filter, string[]? tags, string? order, string? search);
