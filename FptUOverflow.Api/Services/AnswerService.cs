@@ -50,6 +50,21 @@ namespace FptUOverflow.Api.Services
             return _mapper.Map<AnswerResponse>(answer);
         }
 
+        public async Task DeleteAnswerAsync(Guid id)
+        {
+            var answer = await _unitOfWork.AnswerRepository.GetAllAsync(a => a.Id == id);
+            if (answer.FirstOrDefault() == null)
+            {
+                throw new AppException(ErrorCode.NotFound);
+            }
+            var answerVotes = await _unitOfWork.AnswerVoteRepository.GetAllAsync(v => v.AnswerId == id);
+            await _unitOfWork.AnswerVoteRepository.RemoveRange(answerVotes);
+            
+            await _unitOfWork.AnswerRepository.DeleteAsync(answer.FirstOrDefault()!);
+            await _unitOfWork.SaveChangesAsync();
+
+        }
+
         public async Task<AnswerResponse> GetAnswerByIdAsync(Guid id)
         {
             var answers = await _unitOfWork.AnswerRepository.GetAllAsync(a => a.Id == id, "Question,CreatedUser,AnswerVotes");

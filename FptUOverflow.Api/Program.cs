@@ -172,7 +172,7 @@ namespace FptUOverflow.Api
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("CorsPolicy");
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
