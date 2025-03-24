@@ -1,6 +1,7 @@
 ﻿using FptUOverflow.Api.Services;
 using FptUOverflow.Api.Services.IServices;
 using FptUOverflow.Core.CoreObjects;
+using FptUOverflow.Infra.EfCore.Dtos.Request;
 using FptUOverflow.Infra.EfCore.Dtos.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,5 +52,14 @@ namespace FptUOverflow.Api.Controllers
             };
             return Ok(response);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAnswer([FromRoute] Guid id)
+        {
+            await _answerService.DeleteAnswerAsync(id);
+            return NoContent();
+        }
+
+        
     }
 }

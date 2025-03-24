@@ -68,6 +68,11 @@ namespace FptUOverflow.Infra.EfCore.Repositories
             return await _dbSet.FindAsync(id);
         }
 
+        public async Task RemoveRange(IEnumerable<TEntity> entities)
+        {
+            await Task.Run(() => _dbSet.RemoveRange(entities));
+        }
+
         public Task UpdateAsync(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
